@@ -23,3 +23,7 @@ ssh ks@someinternalhost
 ```
 ко всем хостам вида `someinternalhost*`.
 
+
+
+bastion_IP = 35.210.161.51
+someinternalhost_IP = 10.132.0.3
