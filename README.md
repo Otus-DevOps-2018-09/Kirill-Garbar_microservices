@@ -45,23 +45,25 @@
 - Перезапустили контейнеры с новыми сетевыми алиасами без пересборки образов.
 - Создал образы на базе ruby:alpine. Почистил мусор. Для публикации постов уже и так был образ на базе python:alpine.
 - Добавили volume для mongodb. Теперь при перезапуске приложения посты не удаляются.
+- Контейнер с сервисом comment не запускался из-за отсутствия gem tzinfo-data.
+- Написал в travis просьбу разблокировать для меня debug режим. Увидел в логе ошибку. Добавил gem.
 
 ## Как проверить работоспособность.
 - Забрать ветку docker-3.
 - Перейти в директорию репозитория. Перейти в директорию src.
-- Создать docker-host, на нём развернуть три образа командами:
+- Создать docker-host, на нём развернуть три образа командами (подставить юзера) :
 ```
 docker pull mongo:latest
-docker build -t kirillgarbar/post:1.0 ./post-py
-docker build -t kirillgarbar/comment:3.0 ./comment
-docker build -t kirillgarbar/ui:3.0 ./ui
+docker build -t $USER/post:1.0 ./post-py
+docker build -t $USER/comment:3.0 ./comment
+docker build -t $USER/ui:3.0 ./ui
 ```
 - Создать контейнеры командами.
 ```
 docker network create reddit
 docker run -d --network=reddit --network-alias=post_db_newalias --network-alias=comment_db_newalias -v reddit_db:/data/db mongo:latest
-docker run -d --network=reddit --network-alias=post_newalias -e "POST_DATABASE_HOST=post_db_newalias" kirillgarbar/post:1.0
-docker run -d --network=reddit --network-alias=comment_newalias -e "COMMENT_DATABASE_HOST=comment_db_newalias" kirillgarbar/comment:3.0
-docker run -d --network=reddit -p 9292:9292 -e "POST_SERVICE_HOST=post_newalias" -e "COMMENT_SERVICE_HOST=comment_newalias" kirillgarbar/ui:3.0
+docker run -d --network=reddit --network-alias=post_newalias -e "POST_DATABASE_HOST=post_db_newalias" $USER/post:1.0
+docker run -d --network=reddit --network-alias=comment_newalias -e "COMMENT_DATABASE_HOST=comment_db_newalias" $USER/comment:3.0
+docker run -d --network=reddit -p 9292:9292 -e "POST_SERVICE_HOST=post_newalias" -e "COMMENT_SERVICE_HOST=comment_newalias" $USER/ui:3.0
 ```
 - Пройти по docker-host_ip:9292, проверить работу.
