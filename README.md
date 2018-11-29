@@ -48,3 +48,14 @@ gcloud compute instances create reddit-app --boot-disk-size=10GB --image-family=
 ```bash
 gcloud compute firewall-rules create default-puma-server --allow tcp:9292 --target-tags=puma-server --source-ranges=0.0.0.0/0
 ```
+
+
+
+## Packer
+
+Что сделано:
+
+- Создано параметризированное описание базового образа `packer/ubuntu16.json`
+- Создано параметризированное описание неизменяемого образа, содержащего все зависимости
+  и код приложения `packer/immutable.json`
+- Создан скрипт для запуска виртуальной машины из образа, подготовленного выше
