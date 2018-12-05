@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  source:
+    build: ./source
+    image: ${USERNAME}/source:latest
+    volumes:
+      - source_app:/reddit/app
+  ui:
+    volumes:
+      - source_app:/reddit/app
+    command: "puma --debug -w 2"
+    depends_on:
+      - source
+  post:
+    volumes:
+      - source_app:/reddit/app
+    depends_on:
+      - source      
+  comment:
+    volumes:
+      - source_app:/reddit/app
+    depends_on:
+      - source      
+    command: "puma --debug -w 2"
+volumes:
+  source_app:

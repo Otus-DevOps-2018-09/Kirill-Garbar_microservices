@@ -1,9 +1,11 @@
 FROM python:3.6.0-alpine
 
-WORKDIR /app
-COPY . /app
+ENV APP_HOME /reddit/app/post-py
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME
+COPY . $APP_HOME
 
-RUN pip install -r /app/requirements.txt
+RUN pip install -r ${APP_HOME}/requirements.txt
 
 ENV POST_DATABASE_HOST post_db
 ENV POST_DATABASE posts
