@@ -1,0 +1,14 @@
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/home/appuser/reddit
+ExecStart=/usr/local/bin/puma -b tcp://0.0.0.0:9292
+Environment="DATABASE_URL=${db_address}"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

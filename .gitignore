@@ -8,3 +8,4 @@ env
 *.tfstate.backup
 *.tfvars
 .terraform/
+*.tfstate.lock.info
