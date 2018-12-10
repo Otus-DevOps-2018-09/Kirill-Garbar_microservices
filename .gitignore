@@ -15,6 +15,7 @@ tf.log
 jdauphant.nginx
 geerlingguy.pip
 geerlingguy.docker
+solval.gitlab_runner
 vault.key
 # Vagrant & molecule
 .vagrant/

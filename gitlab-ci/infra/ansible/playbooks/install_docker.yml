@@ -1,0 +1,9 @@
+---
+- name: Install docker
+  hosts: tag_docker-host
+  become: true
+  tasks:
+    - import_role:
+        name: geerlingguy.pip
+    - import_role:
+        name: geerlingguy.docker

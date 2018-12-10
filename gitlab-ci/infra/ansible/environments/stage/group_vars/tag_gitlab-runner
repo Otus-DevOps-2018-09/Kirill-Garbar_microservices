@@ -1,0 +1,12 @@
+---
+gitlab_runner_list:
+  - description: first runner
+    url: http://{{ hostvars['docker']['gce_public_ip'] }}/
+    executor: shell
+    docker-image: alpine:3.8
+    registration-token: <token>
+  - description: second runnner
+    url: http://{{ hostvars['docker']['gce_public_ip'] }}/
+    executor: shell
+    docker-image: alpine:3.8
+    registration-token: <token>

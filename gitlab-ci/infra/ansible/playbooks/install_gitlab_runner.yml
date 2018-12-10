@@ -1,0 +1,8 @@
+---
+- name: Install gitlab runner
+  tags: install
+  hosts: tag_gitlab-runner
+  become: true
+  
+  roles:
+    - solval.gitlab_runner  

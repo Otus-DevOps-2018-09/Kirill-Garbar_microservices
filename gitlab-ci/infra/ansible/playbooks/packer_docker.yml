@@ -1,0 +1,14 @@
+---
+- import_playbook: base.yml
+- name: Install docker
+  hosts: all
+  become: true
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+  tasks:
+    - import_role:
+        name: geerlingguy.pip
+    - import_role:
+        name: geerlingguy.docker
