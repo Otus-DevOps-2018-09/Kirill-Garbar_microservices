@@ -134,3 +134,37 @@ by multiple users at the same time. Please resolve the issue above and try
 again. For most commands, you can disable locking with the "-lock=false"
 flag, but this is not recommended.
 ```
+
+
+
+## Ansible-1
+
+Что сделано:
+- установлен ansible с использованием virtualenv и pip
+- написаны inventory файлы в формате ini и yaml
+- написан файл конфигурации ansible.cfg
+- написан скрипт `read_json_inventory.py` для чтения динамического inventory.
+- написан плейбук `clone.yml` для клонирования репозитория
+- исследовано поведение плейбука `clone.yml` при наличии требуемого репозитория на сервере
+и при его отсутствии.
+
+После удаления директории `~/reddit` и повторного примененения плейбука вывод изменился на 
+```
+appserver                  : ok=2    changed=1    unreachable=0    failed=0 
+```
+т.е. применение плейбука привело к изменениям на сервере, в отличие от запуска плейбука, когда репозиторий уже существовал
+на сервере.
+
+
+### Dynamic inventory
+```
+$ ansible all -m ping -i read_json_inventory.py 
+35.205.81.188 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+35.187.187.14 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+```
