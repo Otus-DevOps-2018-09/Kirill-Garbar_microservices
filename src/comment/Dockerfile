@@ -1,7 +1,7 @@
 FROM ruby:2.4.5-alpine3.8
 
-ENV APP_HOME /app
-RUN mkdir $APP_HOME
+ENV APP_HOME /reddit/app/comment
+RUN mkdir -p $APP_HOME
 WORKDIR $APP_HOME
 
 COPY . $APP_HOME

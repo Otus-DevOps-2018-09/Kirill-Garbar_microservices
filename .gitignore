@@ -24,3 +24,4 @@ vault.key
 .cache
 .pytest_cache
 create_docker_host.sh
+.env

@@ -67,3 +67,31 @@ docker run -d --network=reddit --network-alias=comment_newalias -e "COMMENT_DATA
 docker run -d --network=reddit -p 9292:9292 -e "POST_SERVICE_HOST=post_newalias" -e "COMMENT_SERVICE_HOST=comment_newalias" $USER/ui:3.0
 ```
 - Пройти по docker-host_ip:9292, проверить работу.
+
+
+# HW-15
+## В процессе сделано.
+- Запускали контейнеры с разными встроенными драйверами: none, host, bridge.
+- Создали две сети front_net и back_net.
+- Посмотрели автоматически созданные правила iptables.
+- Установили docker-compose. Написали основной конфиг и параметризовали его.
+- Задал имя проекта в файле .env.
+- Создал docker-compose.override.yml в следующей конфигурации: создал ещё один контейнер source, куда поставил git. При запуске контейнер монтирует тому, проверяет, является ли директория git репой и притягивает туда изменения из ветки microservices. После запуска source стартуют остальные контейнеры.
+
+## Как задать имя проекта. 2 варианта.
+- В переменных окружения. Я задал в файле .env.
+- Ключом -p в docker-compose.
+
+## Как проверить работоспособность.
+- Забрать ветку docker-4.
+- Перейти в директорию репозитория. Перейти в директорию src.
+- Создать docker-host, на нём собрать 5 образов командами (подставить юзера):
+```
+docker pull mongo:latest
+docker build -t $USER/post:1.0 ./post-py
+docker build -t $USER/comment:1.0 ./comment
+docker build -t $USER/ui:1.0 ./ui
+docker build -t $USER/source:latest ./source
+```
+- Заполнить файл с переменными .env.
+- Выполнить `docker-compose up -d`
