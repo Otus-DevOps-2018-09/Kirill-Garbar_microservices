@@ -1,0 +1,6 @@
+id_rsa
+appuser
+webprogrammer
+.vscode/
+*.pyc
+.pytest_cache
