@@ -1,0 +1,17 @@
+---
+- name: Run container
+  hosts: tag_reddit-app
+  become: true
+  vars_files:
+    - "{{ inventory_dir }}/dock_reg_creds.yml"
+  tasks:
+    - name: Log into DockerHub
+      docker_login:
+        username: "{{ docker_registry_creds.user }}"
+        password: "{{ docker_registry_creds.password }}"
+    - name: Create a data container
+      docker_container:
+        name: reddit
+        image: kirillgarbar/otus-reddit:1.0
+        published_ports: 9292:9292
+        restart_policy: always

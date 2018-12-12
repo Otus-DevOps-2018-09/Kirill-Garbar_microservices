@@ -1,6 +1,25 @@
+variables.json
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
 id_rsa
 appuser
 webprogrammer
+*.retry
 .vscode/
+gce.ini
+infra*.json
+tf.log
+jdauphant.nginx
+geerlingguy.pip
+geerlingguy.docker
+vault.key
+# Vagrant & molecule
+.vagrant/
+*.log
 *.pyc
+.molecule
+.cache
 .pytest_cache
