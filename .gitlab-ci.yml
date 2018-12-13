@@ -1,36 +1,111 @@
-image: ruby:2.4.2 
+image: docker:stable
 
 stages:
   - build
   - test
-  - deploy
-
-variables:
-  DATABASE_URL: 'mongodb://mongo/user_posts'
-
-before_script:
-  - cd reddit
-  - bundle install 
+  - review
+  - stage
+  - production
 
 build_job:
   stage: build
+  before_script:
+    - docker login -u $DOCKERHUB_LOGIN -p $DOCKERHUB_PASSWORD
   script:
-    - echo 'Building'
+    - docker build -t ${DOCKERHUB_LOGIN}/reddit:${CI_COMMIT_REF_SLUG} ./docker-monolith
+    - docker push ${DOCKERHUB_LOGIN}/reddit:${CI_COMMIT_REF_SLUG}
 
 test_unit_job:
- stage: test
- services:
- - mongo:latest
- script:
- - ruby simpletest.rb 
-
+  stage: test
+  image:
+    name: ${DOCKERHUB_LOGIN}/reddit:${CI_COMMIT_REF_SLUG}
+  before_script:
+    - echo 'Testing 1'
+  script:
+  - cd /reddit
+  - ruby simpletest.rb
 
 test_integration_job:
   stage: test
-  script:
+  before_script:
     - echo 'Testing 2'
-
-deploy_job:
-  stage: deploy
   script:
-    - echo 'Deploy'
+    - echo 'Doing integration tests'
+
+deploy_dev_job:
+  stage: review
+  before_script:
+    - echo 'Deploying 1'
+  script:
+    - echo 'Doing deploy'
+  environment:
+    name: dev
+    url: http://dev.example.com
+
+deploy_branch_job:
+  stage: review
+  image:
+    name: google/cloud-sdk:latest
+  before_script:
+    - echo 'Deploying 2'
+    - docker login -u $DOCKERHUB_LOGIN -p $DOCKERHUB_PASSWORD
+  script:
+    # export gcloud auth variables
+    - echo $CI_GCP_JSON_KEY > ${HOME}/gcloud-service-key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/gcloud-service-key.json
+    - export GOOGLE_PROJECT=$CI_GCP_PROJECT_ID
+    # authenticating gcloud
+    - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+    # install docker-machine
+    - base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+    - curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+    - install /tmp/docker-machine /usr/local/bin/docker-machine
+    # create docker host for application
+    - docker-machine create --driver google --google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts --google-machine-type n1-standard-1 --google-disk-size 10 --google-zone europe-west1-b ${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}
+    # deploy docker container
+    - eval $(docker-machine env --shell sh ${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA})
+    - docker run -d -p 9292:9292 ${DOCKERHUB_LOGIN}/reddit:${CI_COMMIT_REF_SLUG}
+  environment:
+    name: branch-$CI_COMMIT_REF_NAME
+    url: http://${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}.example.com:9292
+  only:
+    - branches
+  except:
+    - master
+
+delete_review_environmnt_job:
+  stage: review
+  when: manual
+  image:
+    name: google/cloud-sdk:latest
+  script:
+    # export gcloud auth variables
+    - echo $CI_GCP_JSON_KEY > ${HOME}/gcloud-service-key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/gcloud-service-key.json
+    - export GOOGLE_PROJECT=$CI_GCP_PROJECT_ID
+    # authenticating gcloud
+    - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+    # delete docker-host
+    - gcloud compute instances delete ${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA} --zone=europe-west1-b -q
+
+staging:
+ stage: stage
+ when: manual
+ only:
+ - /^\d+\.\d+\.\d+/
+ script:
+ - echo 'Deploy'
+ environment:
+  name: stage
+  url: https://beta.example.com
+
+production:
+ stage: production
+ when: manual
+ only:
+ - /^\d+\.\d+\.\d+/
+ script:
+ - echo 'Deploy'
+ environment:
+  name: production
+  url: https://example.com

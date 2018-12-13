@@ -1,15 +1,19 @@
 FROM ubuntu:16.04
 
-RUN apt-get update
-RUN apt-get install -y mongodb-server ruby-full ruby-dev build-essential git
-RUN gem install bundler
-RUN git clone -b monolith https://github.com/express42/reddit.git
+ENV APP_HOME /reddit
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME
 
-COPY mongod.conf /etc/mongod.conf
-COPY db_config /reddit/db_config
-COPY start.sh /start.sh
+RUN apt-get update && \
+apt-get install -y mongodb-server ruby-full ruby-dev build-essential && \
+gem install bundler
 
-RUN cd /reddit && bundle install
-RUN chmod 0777 /start.sh
+COPY . $APP_HOME
+
+RUN cd /reddit && \
+bundle install && \
+mv mongod.conf /etc/mongod.conf && \
+mv start.sh /start.sh && \
+chmod 0777 /start.sh
 
 CMD ["/start.sh"]

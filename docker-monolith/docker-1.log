@@ -1,9 +1,0 @@
-REPOSITORY               TAG                 IMAGE ID            CREATED             SIZE
-kirill/ubuntu-tmp-file   latest              521bde1f2026        45 seconds ago      116MB
-ubuntu                   16.04               a51debf7e1eb        5 days ago          116MB
-nginx                    latest              e81eb098537d        9 days ago          109MB
-hello-world              latest              4ab4c602aa5e        2 months ago        1.84kB
-
-Образ - зафиксированное состояние контейнера. Контейнер - конкретный инстанс образа. Например, у контейнера может быть параметр restart_count, а у образа нет.
-У контейнера есть сетевые настройки, у образа нет. Скорее всего, сетевые настройки докер-контейнера зависят от настроек хоста.
-Из созданного образа можем создать контейнер и образ от этого не изменится.
