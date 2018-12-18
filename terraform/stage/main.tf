@@ -10,7 +10,7 @@ module "app" {
   private_key_path = "${var.private_key_path}"
   zone             = "${var.zone}"
   disk_image       = "${var.app_disk_image}"
-  do_deploy        = true
+  do_deploy        = "${var.do_deploy}"
   db_address       = "${module.db.internal_ip}"
 }
 
@@ -24,4 +24,11 @@ module "db" {
 module "vpc" {
   source        = "../modules/vpc"
   source_ranges = "${var.source_ranges}"
+}
+
+module "sandbox" {
+  source           = "../modules/sandbox"
+  public_key_path  = "${var.public_key_path}"
+  private_key_path = "${var.private_key_path}"
+  zone             = "${var.zone}"
 }

@@ -1,0 +1,16 @@
+plugin: gcp_compute
+projects:
+  - eng-cogency-222612
+filters:
+auth_kind: serviceaccount
+service_account_file: service_account.json
+groups:
+  reddit: "'reddit' in name"
+  app: "'reddit-app' in name"
+  db: "'reddit-db' in name"
+  sandbox: "'sandbox' in name"
+hostnames:
+  - name
+  - public_ip
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP

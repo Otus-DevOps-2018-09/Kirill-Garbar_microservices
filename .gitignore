@@ -9,3 +9,7 @@ env
 *.tfvars
 .terraform/
 *.tfstate.lock.info
+
+# ansible
+*.retry
+/ansible/service_account.json

@@ -6,3 +6,4 @@ private_key_path = "~/.ssh/appuser"
 app_disk_image = "reddit-app-base"
 db_disk_image = "reddit-db-base"
 source_ranges = ["0.0.0.0/0"]
+do_deploy = "false"

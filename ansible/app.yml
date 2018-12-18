@@ -1,0 +1,29 @@
+- name: Configure app
+  hosts: app
+  become: true
+  vars:
+    db_host: reddit-db
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/puma.service
+        dest: /etc/systemd/system/puma.service
+      notify: Reload puma
+
+    - name: Add config for db connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+
+    - name: Enable Puma
+      systemd:
+        name: puma
+        enabled: yes
+
+  handlers:
+    - name: Reload puma
+      service:
+        name: puma
+        state: reloaded

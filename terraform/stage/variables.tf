@@ -38,3 +38,8 @@ variable "source_ranges" {
     "0.0.0.0/0",
   ]
 }
+
+variable do_deploy {
+  description = "Deploy or not deploy, that's the question"
+  default     = false
+}

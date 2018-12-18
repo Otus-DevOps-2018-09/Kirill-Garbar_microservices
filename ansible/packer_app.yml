@@ -1,0 +1,11 @@
+- name: Install ruby and bundler
+  hosts: all
+  become: true
+  tasks:
+    - name: Install packages
+      package:
+        name:
+          - ruby-full
+          - bundler
+          - build-essential
+        state: present

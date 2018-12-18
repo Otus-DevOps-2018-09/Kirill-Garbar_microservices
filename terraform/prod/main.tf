@@ -10,7 +10,7 @@ module "app" {
   private_key_path = "${var.private_key_path}"
   zone             = "${var.zone}"
   disk_image       = "${var.app_disk_image}"
-  do_deploy        = true
+  do_deploy        = "${var.do_deploy}"
   db_address       = "${module.db.internal_ip}"
 }
 
