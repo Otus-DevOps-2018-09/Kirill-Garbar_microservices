@@ -3,7 +3,7 @@ projects:
   - eng-cogency-222612
 filters:
 auth_kind: serviceaccount
-service_account_file: service_account.json
+service_account_file: ~/.gcp/service_account.json
 groups:
   reddit: "'reddit' in name"
   app: "'reddit-app' in name"
