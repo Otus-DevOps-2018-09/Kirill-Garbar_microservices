@@ -29,7 +29,7 @@ build_prometheus:
 
 build_mongodb_exporter:
 	@cd monitoring/mongodb-exporter && \
-	docker build -t $(USER_NAME)/mongodb_exporter .
+	docker build -t $(USER_NAME)/mongodb-exporter:1.0 .
 
 push:
 	@echo '\033[0;32m'"Input password for dockerhub. It will not be saved anywhere."'\033[0m'
@@ -38,4 +38,4 @@ push:
 	@docker push $(USER_NAME)/comment
 	@docker push $(USER_NAME)/post
 	@docker push $(USER_NAME)/prometheus
-	@docker push $(USER_NAME)/mongodb_exporter
+	@docker push $(USER_NAME)/mongodb-exporter:1.0
