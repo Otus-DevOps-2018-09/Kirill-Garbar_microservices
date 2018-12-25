@@ -1,0 +1,30 @@
+---
+- name: Run gitlab
+  hosts: tag_gitlab
+  become: true
+  tasks:
+    - name: debug
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['gce_public_ip'] }}"
+    - name: Create config directory
+      file:
+        path: /srv/gitlab/config
+        state: directory
+    - name: Create data directory
+      file:
+        path: /srv/gitlab/data
+        state: directory
+    - name: Create logs directory
+      file:
+        path: /srv/gitlab/logs
+        state: directory
+
+    - name: Copy docker-compose
+      template:
+        src: ../templates/gitlab-docker-compose.yml
+        dest: /srv/gitlab/docker-compose.yml
+        mode: 0644
+
+    - name: Run docker-compose
+      docker_service:
+        project_src: /srv/gitlab

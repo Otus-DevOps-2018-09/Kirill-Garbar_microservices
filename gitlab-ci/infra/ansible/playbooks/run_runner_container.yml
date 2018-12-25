@@ -1,0 +1,18 @@
+---
+- name: Run gitlab-runner
+  hosts: tag_gitlab-runner
+  become: true
+  tasks:
+    - name: create firectory for runner config
+      file:
+        path: /srv/gitlab/gitlab-runner
+        state: directory
+    - name: Copy docker-compose
+      template:
+        src: ../templates/runner-docker-compose.yml
+        dest: /srv/gitlab/docker-compose.yml
+        mode: 0644
+
+    - name: Run docker-compose
+      docker_service:
+        project_src: /srv/gitlab
