@@ -6,7 +6,7 @@ WORKDIR $APPPATH
 RUN git clone "https://github.com/percona/mongodb_exporter" "$APPPATH"
 RUN go get -d && GOOS=linux CGO_ENABLED=0 go build -ldflags '-extldflags "-static" -w -s' -o /mongodb_exporter
 
-FROM alpine:latest
+FROM scratch
 COPY --from=builder /mongodb_exporter /mongodb_exporter
 
 EXPOSE 9216
