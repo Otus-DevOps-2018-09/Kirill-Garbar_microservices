@@ -7,6 +7,7 @@ WORKDIR $APP_HOME
 COPY . $APP_HOME
 
 RUN apk --no-cache add --virtual build-tools ruby-dev g++ make ruby-bundler \
+&& apk add bash curl \
 && bundle install \
 && apk del build-tools \
 && rm -rf /usr/local/bundle/cache/* \

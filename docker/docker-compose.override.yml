@@ -1,7 +1,6 @@
 version: '3.3'
 services:
   source:
-    build: ./source
     image: ${USERNAME}/source:latest
     volumes:
       - source_app:/reddit/app
@@ -11,16 +10,19 @@ services:
     command: "puma --debug -w 2"
     depends_on:
       - source
+      - prometheus
   post:
     volumes:
       - source_app:/reddit/app
     depends_on:
-      - source      
+      - source
+      - prometheus
   comment:
     volumes:
       - source_app:/reddit/app
     depends_on:
-      - source      
+      - source
+      - prometheus
     command: "puma --debug -w 2"
 volumes:
   source_app:

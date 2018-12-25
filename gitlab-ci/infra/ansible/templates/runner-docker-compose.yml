@@ -13,11 +13,35 @@ runner-1-register:
   command:
     - register
     - --non-interactive
-    - --url=<IP>
-    - --registration-token=<token>
-    - --tag-list=linux
+    - --url=http://{{ gitlab_external_ip }}
+    - --registration-token=waFsmLGSstQJgxfzqGYr
+    - --docker-volumes=/var/run/docker.sock:/var/run/docker.sock
     - --description=my-runner
     - --executor=docker
     - --docker-image=alpine:3.8
     - --run-untagged
     - --locked=false
+
+runner-2:
+  restart: always
+  image: gitlab/gitlab-runner:latest
+  volumes:
+    - '/srv/gitlab-runner-2/config:/etc/gitlab-runner'
+    - '/var/run/docker.sock:/var/run/docker.sock'
+
+runner-2-register:
+  image: 'gitlab/gitlab-runner:latest'
+  restart: "no"
+  volumes:
+    - '/srv/gitlab-runner-2/config:/etc/gitlab-runner'
+  command:
+    - register
+    - --non-interactive
+    - --url=http://{{ gitlab_external_ip }}
+    - --registration-token=waFsmLGSstQJgxfzqGYr
+    - --docker-volumes=/var/run/docker.sock:/var/run/docker.sock
+    - --description=my-runner
+    - --executor=docker
+    - --docker-image=alpine:3.8
+    - --run-untagged
+    - --locked=false    

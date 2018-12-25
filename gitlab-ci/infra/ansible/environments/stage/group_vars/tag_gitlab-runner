@@ -10,3 +10,4 @@ gitlab_runner_list:
     executor: shell
     docker-image: alpine:3.8
     registration-token: <token>
+gitlab_external_ip: "{{ hostvars['gitlab']['gce_public_ip'] }}"

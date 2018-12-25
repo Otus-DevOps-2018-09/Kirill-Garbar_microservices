@@ -3,7 +3,7 @@
   hosts: tag_gitlab-runner
   become: true
   tasks:
-    - name: create firectory for runner config
+    - name: create directory for runner config
       file:
         path: /srv/gitlab/gitlab-runner
         state: directory
