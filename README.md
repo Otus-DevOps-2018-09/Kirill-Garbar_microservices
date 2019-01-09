@@ -151,3 +151,63 @@ docker build -t $USER/source:latest ./source
 
 ## Ссылка на докер хаб с моими образами.
 - https://hub.docker.com/u/kirillgarbar
+
+# HW-19
+## В процессе сделано.
+- Создали докер-хост.
+- Разделили docker-compose на два файла. С контейнерами приложения и с контейнерами мониторинга.
+- Запустили cAdvisor. Это сервис отображения информации о работающих контейнерах, потреблении ресурсов и запущенных внури контейнеров процессах. Добавили в настройки prometheus target cAdvisor. В GCP нужно открыть порт 8080.
+- Запустили grafana. В GCP нужно открыть порт 3000. Добавили вручную источник prometheus, загрузили дашборд из комьюнити.
+- Добавили несколько метрик из приложения, rate ошибочных запросов. rate - производная функции по времени (показывает скорость изменения графика).
+- Добавили мониторинг метрик бизнес логики. Счётчик комментариев и постов. Добавили скорость роста количества комментариев и постов за последний час.
+- Добавили контейнер alertmanager и отправку алертов в наш канал slack.
+- Добавили alert на условие down любого из контейнеров.
+
+## Дополнительные задания.
+- Поменял Makefile. Добавил возможность пообразной сборки. Добавил сборку и пуш всех образов из основных и доп.заданий.
+- Поменял версии образов на актуальные.
+- Добавил мониторинг docker engine. В cAdvisor метрик больше, я здесь не увидел поконтейнерных метрик, а только в целом за docker engine. Сравнивать с cAdvisor его некорректно. Конфиг в /etc/docker/daemon.json
+`
+{
+  "metrics-addr" : "10.0.2.1:9323",
+  "experimental" : true
+}
+`
+- Добавил target в prometheus, добавил dashboard из комьюнити.
+- Добавил мониторинг докера через telegraf от influxdb. Telegraf собирает метрики с разных источников и конвертирует их для разных получателей. Добавил дашборд из чужого репозитория, в комьюнити ничего не нашёл. :)
+- Добавил рекомендованный алерт на превышение порога 95 процентилем времени ответа. Попрог вычислен опытным путём, чтобы алерты срабатывали иногда.
+- Настроил alertmanager на отправку алертов на email. Интегрировал с google smtp через app password.
+- Экспортировал дашборды, описал datasource, которые добавляются при старте контейнера.
+- Настроил stackdriver в GCP. Добавил stackdriver-exporter. Ниже описаны метрики, который собираются в prometheus (метрики по instance и метрики по monitoring). Stackdriver аутентифицируется в GCP с помощью секретного JSON, который находится на докер-хосте. Проброшен в контейнер как секрет.
+- Добавил бизнес метрику `votes_count (счётчик голосов)` в сервис post. Счётчик увеличивается при вызове функции "проголосовать". Добавил отображение графика rate() в графану. Счётчики обнуляются при перезапуске приложения, поэтому мониторить их в данном случае без rate не имеет смысла.
+- Добавил техническую метрику `comments_read_db_seconds (время получения комментариев к посту)` типа гистограмма.
+- Добавил trickster proxy, опубликовал на порт 9393. Полностью дублируется интерфейс prometheus, метрики доступны.
+- Trickster публикует свои метрики на порт 8082.
+
+## Какие метрики удалось собрать stackdriver-exporter.
+stackdriver_gce_instance_compute_googleapis_com_firewall_dropped_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_firewall_dropped_packets_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_cpu_reserved_cores gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_cpu_usage_time gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_cpu_utilization gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_read_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_read_ops_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_throttled_read_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_throttled_read_ops_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_throttled_write_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_throttled_write_ops_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_write_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_disk_write_ops_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_integrity_early_boot_validation_status gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_integrity_late_boot_validation_status gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_network_received_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_network_received_packets_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_network_sent_bytes_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_network_sent_packets_count gauge
+stackdriver_gce_instance_compute_googleapis_com_instance_uptime gauge
+stackdriver_monitoring_api_calls_total counter
+stackdriver_monitoring_last_scrape_duration_seconds gauge
+stackdriver_monitoring_last_scrape_error gauge
+stackdriver_monitoring_last_scrape_timestamp gauge
+stackdriver_monitoring_scrape_errors_total counter
+stackdriver_monitoring_scrapes_total counter

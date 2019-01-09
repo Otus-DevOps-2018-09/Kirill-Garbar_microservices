@@ -1,0 +1,17 @@
+global:
+  slack_api_url: 'https://hooks.slack.com/services/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'
+
+route:
+  receiver: 'slack-email-notifications'
+
+receivers:
+- name: 'slack-email-notifications'
+  slack_configs:
+  - channel: '#kirill_garbar'
+  email_configs:
+  - to: "kirill@garbar.pro"
+    from: "kirill@garbar.pro"
+    smarthost: "smtp.gmail.com:587"
+    auth_username: "kirill@garbar.pro"
+    auth_identity: "kirill@garbar.pro"
+    auth_password: "app_password"

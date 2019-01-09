@@ -5,7 +5,9 @@ RUN mkdir -p $APP_HOME
 WORKDIR $APP_HOME
 COPY . $APP_HOME
 
-RUN pip install -r ${APP_HOME}/requirements.txt
+RUN apk --no-cache add --virtual build-tools gcc musl-dev \
+&& pip install -r ${APP_HOME}/requirements.txt \
+&& apk del build-tools
 
 ENV POST_DATABASE_HOST post_db
 ENV POST_DATABASE posts
