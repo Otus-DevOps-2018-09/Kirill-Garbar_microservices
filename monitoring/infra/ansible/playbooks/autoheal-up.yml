@@ -1,0 +1,31 @@
+---
+- hosts: tag_awx-autoheal
+  become: true
+
+  tasks:
+    - name: Check minikube config
+      stat:
+        path: /root/.minikube
+      register: minikube_config
+
+    - name: Start minicube
+      command: minikube start --vm-driver=none
+      when: not minikube_config.stat.exists
+
+    - name: Start autoheal container
+      docker_service:
+        project_name: "{{ COMPOSE_PROJECT_NAME }}"
+        recreate: always
+        pull: yes
+        definition:
+          version: '3.3'
+          services:
+            autoheal:
+              image: "{{USERNAME}}/autoheal"
+              entrypoint: /autoheal server --config-file=/autoheal.yml
+              ports:
+                - 9099:9099
+              volumes:
+                - /root/.kube/:/root/.kube
+                - /root/.minikube/:/root/.minikube
+                - /root/configs/autoheal_autoheal.yml:/autoheal.yml

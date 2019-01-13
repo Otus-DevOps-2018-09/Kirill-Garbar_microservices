@@ -9,9 +9,11 @@ receivers:
   slack_configs:
   - channel: '#kirill_garbar'
   email_configs:
-  - to: "kirill@garbar.pro"
-    from: "kirill@garbar.pro"
+  - to: "{{ email_to }}"
+    from: "{{ email_from }}"
     smarthost: "smtp.gmail.com:587"
-    auth_username: "kirill@garbar.pro"
-    auth_identity: "kirill@garbar.pro"
-    auth_password: "app_token"
+    auth_username: "{{ email_from }}"
+    auth_identity: "{{ email_from }}"
+    auth_password: "{{ email_app_password }}"
+  webhook_configs:
+  - url: http://{{ awx_autoheal_internal_ip }}:9099/alerts

@@ -1,0 +1,1 @@
+awx_autoheal_external_ip: "{{ hostvars['awx-autoheal']['gce_public_ip'] }}"

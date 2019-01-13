@@ -1,0 +1,187 @@
+---
+- name: Service in docker-compose
+  hosts: tag_reddit-monitoring
+  become: true
+  tasks:
+    - name: App
+      docker_service:
+        project_name: "{{ COMPOSE_PROJECT_NAME }}"
+        recreate: always
+        pull: yes
+        definition:
+          version: '3.3'
+          services:
+            source:
+              image: "{{USERNAME}}/source"
+              volumes:
+                - source_app:/reddit/app
+            post_db:
+              image: mongo:{{MONGO_V}}
+              volumes:
+                - post_db:/data/db
+              networks:
+                back_net:
+                  aliases:
+                    - comment_db
+                    - post_db
+            ui:
+              image: "{{ USERNAME }}/ui:{{UI_V}}"
+              volumes:
+                - source_app:/reddit/app
+              ports:
+                - "{{PORT}}:9292/tcp"
+              networks:
+                - front_net
+            post:
+              image: "{{USERNAME}}/post:{{POST_V}}"
+              volumes:
+                - source_app:/reddit/app
+              networks:
+                - front_net
+                - back_net
+            comment:
+              image: "{{USERNAME}}/comment:{{COMMENT_V}}"
+              volumes:
+                - source_app:/reddit/app
+              networks:
+                - front_net
+                - back_net
+          volumes:
+            post_db: {}
+            source_app: {}
+          networks:
+            front_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                  - subnet: 10.0.1.0/24
+            back_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                  - subnet: 10.0.2.0/24
+
+    - name: Monitoring
+      docker_service:
+        project_name: "{{ COMPOSE_PROJECT_NAME }}"
+        recreate: always
+        pull: yes
+        definition:
+          version: '3.3'
+          services:
+            prometheus:
+              image: "{{USERNAME}}/prometheus"
+              ports:
+                - '9090:9090'
+              volumes:
+                - prometheus_data:/prometheus
+                - /root/configs/prometheus_alerts.yml:/etc/prometheus/alerts.yml
+              command:
+                - '--config.file=/etc/prometheus/prometheus.yml'
+                - '--storage.tsdb.path=/prometheus'
+                - '--storage.tsdb.retention=1d'
+              networks:
+                - front_net
+                - back_net
+            node-exporter:
+              image: prom/node-exporter:v0.15.2
+              user: root
+              volumes:
+              - /proc:/host/proc:ro
+              - /sys:/host/sys:ro
+              - /:/rootfs:ro
+              command:
+              - '--path.procfs=/host/proc'
+              - '--path.sysfs=/host/sys'
+              - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+              networks:
+                - back_net
+            mongodb-exporter:
+              image: "{{USERNAME}}/mongodb-exporter:1.0"
+              command:
+              - '-mongodb.uri=mongodb://post_db:27017'
+              networks:
+                - back_net
+            blackbox-exporter:
+              image: prom/blackbox-exporter:v0.13.0
+              networks:
+                - front_net
+                - back_net
+            cadvisor:
+              image: google/cadvisor:v0.29.0
+              volumes:
+                - '/:/rootfs:ro'
+                - '/var/run:/var/run:rw'
+                - '/sys:/sys:ro'
+                - '/var/lib/docker/:/var/lib/docker:ro'
+              ports:
+                - '8080:8080'
+              networks:
+                - back_net
+            grafana:
+              image: "{{USERNAME}}/grafana"
+              volumes:
+                - grafana_data:/var/lib/grafana
+              environment:
+                - GF_SECURITY_ADMIN_USER=admin
+                - GF_SECURITY_ADMIN_PASSWORD=secret
+              depends_on:
+                - prometheus
+              ports:
+                - 3000:3000
+              networks:
+                - back_net
+            alertmanager:
+              image: "{{USERNAME}}/alertmanager"
+              volumes:
+                - /root/configs/alertmanager_config.yml:/etc/alertmanager/config.yml
+              command:
+                - '--config.file=/etc/alertmanager/config.yml'
+              ports:
+                - 9093:9093
+              networks:
+                - back_net      
+            telegraf:
+              image: "{{USERNAME}}/telegraf"
+              volumes:
+                - /var/run/docker.sock:/var/run/docker.sock
+              networks:
+                - back_net
+            stackdriver-exporter:
+              image: frodenas/stackdriver-exporter
+              environment:
+                GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/GOOGLE_APPLICATION_CREDENTIALS
+                STACKDRIVER_EXPORTER_GOOGLE_PROJECT_ID: "{{STACKDRIVER_EXPORTER_GOOGLE_PROJECT_ID}}"
+                STACKDRIVER_EXPORTER_MONITORING_METRICS_TYPE_PREFIXES: "{{STACKDRIVER_EXPORTER_MONITORING_METRICS_TYPE_PREFIXES}}"
+              secrets:
+                - GOOGLE_APPLICATION_CREDENTIALS
+              networks:
+                - back_net
+            trickster:
+              image: "{{USERNAME}}/trickster"
+              networks:
+                - back_net
+
+          secrets:
+            GOOGLE_APPLICATION_CREDENTIALS:
+              file: /home/{{ deploy_user }}/gce_creds/GOOGLE_JSON
+
+          volumes:
+            prometheus_data: {}
+            grafana_data: {}
+
+          networks:
+            front_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                  - subnet: 10.0.1.0/24
+            back_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                  - subnet: 10.0.2.0/24

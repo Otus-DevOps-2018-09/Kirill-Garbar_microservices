@@ -1,0 +1,3 @@
+---
+- import_playbook: reddit-monitoring.yml
+- import_playbook: awx-autoheal.yml

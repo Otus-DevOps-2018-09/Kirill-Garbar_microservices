@@ -1,0 +1,50 @@
+---
+- name: Create nets
+  hosts: tag_reddit-monitoring
+  become: true
+
+  vars_files:
+  - "{{ inventory_dir }}/secret_vars.yml"
+
+  tasks:
+    - name: Create networks
+      docker_service:
+        project_name: "{{ COMPOSE_PROJECT_NAME }}"
+        recreate: always
+        definition:
+          version: '3.3'
+          networks:
+            front_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                - subnet: 10.0.1.0/24
+            back_net:
+              driver: bridge
+              ipam:
+                driver: default
+                config:
+                  - subnet: 10.0.2.0/24
+
+    - name: Copy GCP JSON file
+      copy:
+        src: ~/gce_creds/GOOGLE_JSON
+        dest: /home/{{ deploy_user }}/gce_creds/
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: 0644
+      no_log: true
+
+    - name: Create configs dir
+      file:
+        path: /root/configs
+        state: directory
+
+    - name: Copy configs
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - { src: '../templates/alertmanager_config.yml.j2', dest: '/root/configs/alertmanager_config.yml' }
+      no_log: true

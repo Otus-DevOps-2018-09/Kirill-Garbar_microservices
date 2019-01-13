@@ -7,11 +7,11 @@ default: build push
 
 build: build_reddit build_monitoring
 build_reddit: build_comment build_ui build_post build_source
-build_monitoring: build_prometheus build_mongodb_exporter build_alertmanager build_grafana build_telegraf build_trickster
+build_monitoring: build_prometheus build_mongodb_exporter build_alertmanager build_grafana build_telegraf build_trickster build_autoheal
 
 push: push_reddit push_monitoring
 push_reddit: push_ui push_comment push_post push_source
-push_monitoring: push_prometheus push_mongodb_exporter push_alertmanager push_grafana push_telegraf push_trickster
+push_monitoring: push_prometheus push_mongodb_exporter push_alertmanager push_grafana push_telegraf push_trickster push_autoheal
 
 comment: build_comment push_comment
 ui: build_ui push_ui
@@ -24,6 +24,7 @@ alertmanager: build_alertmanager push_alertmanager
 grafana: build_grafana push_grafana
 telegraf: build_telegraf push_telegraf
 trickster: build_trickster push_trickster
+autoheal: build_autoheal push_autoheal
 
 build_comment:
 	@echo $(delimiter) $@ $(delimiter)
@@ -71,6 +72,11 @@ build_trickster:
 	@cd monitoring/trickster && \
 	docker build -t $(USER_NAME)/trickster .
 
+build_autoheal:
+	@echo $(delimiter) $@ $(delimiter)
+	@cd monitoring/autoheal && \
+	docker build -t $(USER_NAME)/autoheal .
+
 push_ui:
 	@echo $(delimiter) $@ $(delimiter)
 	@docker push $(USER_NAME)/ui
@@ -110,3 +116,7 @@ push_telegraf:
 push_trickster:
 	@echo $(delimiter) $@ $(delimiter)
 	@docker push $(USER_NAME)/trickster
+
+push_autoheal::
+	@echo $(delimiter) $@ $(delimiter)
+	@docker push $(USER_NAME)/autoheal

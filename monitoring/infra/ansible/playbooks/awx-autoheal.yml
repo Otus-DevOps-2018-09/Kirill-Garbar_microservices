@@ -1,0 +1,4 @@
+---
+- import_playbook: awx-install.yml
+- import_playbook: autoheal-prep.yml
+- import_playbook: autoheal-up.yml

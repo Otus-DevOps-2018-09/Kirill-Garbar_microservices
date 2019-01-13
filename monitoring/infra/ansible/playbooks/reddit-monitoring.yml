@@ -1,0 +1,4 @@
+---
+- import_playbook: reddit-monitoring-prep.yml
+- import_playbook: configure-docker-metrics.yml
+- import_playbook: reddit-monitoring-up.yml

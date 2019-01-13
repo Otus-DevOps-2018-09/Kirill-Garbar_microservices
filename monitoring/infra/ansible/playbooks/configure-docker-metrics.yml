@@ -1,0 +1,16 @@
+---
+- name: configure docker metrics
+  hosts: tag_reddit-monitoring
+  become: true
+  tasks:
+    - name: Copy docker daemon config
+      template:
+        src: ../templates/daemon.json
+        dest: /etc/docker/daemon.json
+        mode: 0644
+      notify: restart docker daemon
+  handlers:
+    - name: restart docker daemon
+      systemd:
+        name: docker.service
+        state: restarted

@@ -1,0 +1,4 @@
+env: stage
+deploy_user: appuser
+COMPOSE_PROJECT_NAME: otus_reddit
+USERNAME: kirillgarbar

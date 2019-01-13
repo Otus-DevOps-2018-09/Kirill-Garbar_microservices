@@ -1,5 +1,9 @@
 version: '3.3'
 services:
+  source:
+    image: ${USERNAME}/source
+    volumes:
+      - source_app:/reddit/app
   post_db:
     image: mongo:${MONGO_V}
     volumes:
@@ -11,17 +15,25 @@ services:
           - post_db
   ui:
     image: ${USERNAME}/ui:${UI_V}
+    volumes:
+      - source_app:/reddit/app
+    command: "puma --debug -w 2"      
     ports:
       - ${PORT}:9292/tcp
     networks:
       - front_net
   post:
     image: ${USERNAME}/post:${POST_V}
+    volumes:
+      - source_app:/reddit/app
     networks:
       - front_net
       - back_net
   comment:
     image: ${USERNAME}/comment:${COMMENT_V}
+    volumes:
+      - source_app:/reddit/app
+    command: "puma --debug -w 2"
     networks:
       - front_net
       - back_net

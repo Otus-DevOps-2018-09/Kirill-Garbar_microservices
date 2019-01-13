@@ -183,6 +183,15 @@ docker build -t $USER/source:latest ./source
 - Добавил техническую метрику `comments_read_db_seconds (время получения комментариев к посту)` типа гистограмма.
 - Добавил trickster proxy, опубликовал на порт 9393. Полностью дублируется интерфейс prometheus, метрики доступны.
 - Trickster публикует свои метрики на порт 8082.
+- При выполнении задания AWX+autoheal нужно написать playbook для восстановения контейнеров. Я не захотел копировать docker compose, а весь запуск сервисов решил перенести в ansible. Более того, в модуле docker_service нельзя указать кастомный файл docker-compose.yml. Имя захардожено в Ansible. ВМ в ТФ создана на базе того же образа, что и autoheal. Образ с установленными docker и pip. В pip поставлены docker-compose и docker (питоновская либа). Потом понял, что можно было всё оставить в docker-compose (AWX генерирует dockr-compose.yml, который можно использовать). Всё равно для перезапуска сервисов, скорее всего, придётся писать отдельный playbook.
+- Создал проект. Проект это то, что хранит плейбуки для запуска. Удобнее всего проект загружать из гита.
+- Создал job template. Это плейбук из проекта из предыдщуего пункта, который запускается по событию.
+- Добавил SSH credentials для подключения к машине с докер-контейнерами.
+- GCE credentials для dynamic inventory. Сам скрипт получения инвентори уже есть в AWX.
+- Inventory с источником GCE script.
+- Для проекта нужна отдельная ансибл-инфра, т.к. в уже созданной никак не подтянуть переменные (ansible.cfg). Это либо отдельная ветка, либо отдельная репа.
+- Сначала сделал старт контейнера через ансибл модуль docker-container. Не получилось, т.к. не смог найти, как сделать просто start существющего контейнера. Модулю нужна была конфигурация. В итоге сделал через модуль command.
+- Конфиги с чувствительными данными (prometheus alerts и autoheal) копирую ансиблом на докер-хост и подключаю их как volume. Переменные зашифрованы ansible-vault.
 
 ## Какие метрики удалось собрать stackdriver-exporter.
 stackdriver_gce_instance_compute_googleapis_com_firewall_dropped_bytes_count gauge
@@ -211,3 +220,21 @@ stackdriver_monitoring_last_scrape_error gauge
 stackdriver_monitoring_last_scrape_timestamp gauge
 stackdriver_monitoring_scrape_errors_total counter
 stackdriver_monitoring_scrapes_total counter
+
+## Ссылка на докер хаб с моими образами.
+- https://hub.docker.com/u/kirillgarbar
+
+## Как проверить работоспособность.
+- Забрать ветку monitoring-2.
+- Вся инфра хранится в monitoring/infra.
+- Пакером создать образ с докерхостом (docker.json), заполнив переменные.
+- ТФом создать две ВМ `stage/awx-autoheal.tf` и `stage/reddit-monitoring.tf`.
+- Выполнить make из корня репы, заполнив .make_vars (Или взять мои образы USERNAME=kirillgarbar).
+- Заполнить переменные в Ансибл. В secret_vars.yml зашифрован пароль от учётки гугла и логин-пароль от AWX.
+- Выполнить Ансибл playbook playbooks/main.yml.
+- Создать проект в AWX с истоником https://github.com/Kirill-Garbar/start-containers и отсинкать.
+- Создать job template.
+- Добавить SSH credentials для подключения к машине с докер-контейнерами.
+- Добавить GCE credentials JSON.
+- Создать Inventory с источником GCE script и отсинкать.
+- Выключить один из микросервисов (ui,post,comment) и ждать восстановления.
