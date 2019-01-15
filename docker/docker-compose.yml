@@ -40,6 +40,7 @@ services:
 
 volumes:
   post_db:
+  source_app:
 
 networks:
   front_net:
