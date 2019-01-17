@@ -1,0 +1,13 @@
+pip_install_packages:
+    - name: docker
+    - name: docker-compose
+PORT: 9292
+UI_V: latest
+POST_V: latest
+COMMENT_V: latest
+MONGO_V: latest
+STACKDRIVER_EXPORTER_GOOGLE_PROJECT_ID: docker-223709
+STACKDRIVER_EXPORTER_MONITORING_METRICS_TYPE_PREFIXES: compute.googleapis.com,monitoring.googleapis.com
+awx_autoheal_internal_ip: "{{ hostvars['awx-autoheal']['gce_private_ip'] }}"
+email_from: kirill@garbar.pro
+email_to: kirill@garbar.pro 

@@ -1,0 +1,19 @@
+global:
+  slack_api_url: 'https://hooks.slack.com/services/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'
+
+route:
+  receiver: 'slack-email-notifications'
+
+receivers:
+- name: 'slack-email-notifications'
+  slack_configs:
+  - channel: '#kirill_garbar'
+  email_configs:
+  - to: "{{ email_to }}"
+    from: "{{ email_from }}"
+    smarthost: "smtp.gmail.com:587"
+    auth_username: "{{ email_from }}"
+    auth_identity: "{{ email_from }}"
+    auth_password: "{{ email_app_password }}"
+  webhook_configs:
+  - url: http://{{ awx_autoheal_internal_ip }}:9099/alerts

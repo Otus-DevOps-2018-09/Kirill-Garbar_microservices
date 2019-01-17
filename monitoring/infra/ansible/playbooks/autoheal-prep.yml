@@ -1,0 +1,27 @@
+---
+- hosts: tag_awx-autoheal
+  become: true
+
+  vars_files:
+  - "{{ inventory_dir }}/secret_vars.yml"
+
+  tasks:
+    - name: Copy configs
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - { src: '../templates/autoheal_autoheal.yml.j2', dest: '/root/configs/autoheal_autoheal.yml' }
+      no_log: true
+
+    - name: Download minicube-linux-amd64
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: 0755
+    
+    - name: Download kubectl
+      get_url:
+        url: https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: 0755

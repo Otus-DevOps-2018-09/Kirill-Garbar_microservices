@@ -1,0 +1,24 @@
+awx:
+  address: http://{{ awx_autoheal_external_ip }}/api
+
+  credentials:
+    username: "{{ awx_username }}"
+    password: "{{ awx_password }}"
+
+  project: "docker project"
+  insecure: true
+
+throttling:
+  interval: 5s
+
+rules:
+- metadata:
+    name: start-container
+  labels:
+    alertname: "InstanceDown"
+  awxJob:
+    template: "Restart container"
+    extraVars:
+{%- raw %}
+      service: "{{ $labels.job }}"
+{% endraw %}
