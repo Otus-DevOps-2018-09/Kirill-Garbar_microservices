@@ -13,30 +13,55 @@ services:
         aliases:
           - comment_db
           - post_db
+    depends_on:
+      - source
   ui:
     image: ${USERNAME}/ui:${UI_V}
     volumes:
       - source_app:/reddit/app
-    command: "puma --debug -w 2"      
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    command: "puma --debug -w 2"
     ports:
       - ${PORT}:9292/tcp
     networks:
       - front_net
+    depends_on:
+      - source
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.ui
   post:
     image: ${USERNAME}/post:${POST_V}
     volumes:
       - source_app:/reddit/app
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}      
     networks:
       - front_net
       - back_net
+    depends_on:
+      - source
+      - post_db
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.post
   comment:
     image: ${USERNAME}/comment:${COMMENT_V}
     volumes:
       - source_app:/reddit/app
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}      
     command: "puma --debug -w 2"
     networks:
       - front_net
       - back_net
+    depends_on:
+      - source
 
 volumes:
   post_db:

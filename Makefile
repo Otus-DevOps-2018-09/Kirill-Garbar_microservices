@@ -5,13 +5,15 @@ default: build push
 .DEFAULT:
 	echo '\033[0;32m'"Please specify dockerhub user in .make_vars file. Use .make_vars.example"'\033[0m'
 
-build: build_reddit build_monitoring
+build: build_reddit build_monitoring build_logging
 build_reddit: build_comment build_ui build_post build_source
 build_monitoring: build_prometheus build_mongodb_exporter build_alertmanager build_grafana build_telegraf build_trickster build_autoheal
+build_logging: build_fluentd
 
 push: push_reddit push_monitoring
 push_reddit: push_ui push_comment push_post push_source
 push_monitoring: push_prometheus push_mongodb_exporter push_alertmanager push_grafana push_telegraf push_trickster push_autoheal
+push_logging: push_fluentd
 
 comment: build_comment push_comment
 ui: build_ui push_ui
@@ -25,6 +27,7 @@ grafana: build_grafana push_grafana
 telegraf: build_telegraf push_telegraf
 trickster: build_trickster push_trickster
 autoheal: build_autoheal push_autoheal
+fluentd: build_fluentd push_fluentd
 
 build_comment:
 	@echo $(delimiter) $@ $(delimiter)
@@ -77,6 +80,12 @@ build_autoheal:
 	@cd monitoring/autoheal && \
 	docker build -t $(USER_NAME)/autoheal .
 
+build_fluentd:
+	@echo $(delimiter) $@ $(delimiter)
+	@cd logging/fluentd && \
+	docker build -t $(USER_NAME)/fluentd .
+
+
 push_ui:
 	@echo $(delimiter) $@ $(delimiter)
 	@docker push $(USER_NAME)/ui
@@ -120,3 +129,7 @@ push_trickster:
 push_autoheal::
 	@echo $(delimiter) $@ $(delimiter)
 	@docker push $(USER_NAME)/autoheal
+
+push_fluentd:
+	@echo $(delimiter) $@ $(delimiter)
+	@docker push $(USER_NAME)/fluentd
