@@ -1,0 +1,78 @@
+---
+- name: Create compute resources
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Create kubernetes-the-hard-way network
+      gce_net:
+        name: kubernetes-the-hard-way
+        mode: custom
+        subnet_region: us-west1
+        subnet_name: "kubernetes"
+        ipv4_range: '10.240.0.0/24'
+        state: "present"
+
+    - name: Create firewall rule kubernetes-the-hard-way-aalow-internal
+      gce_net:
+        name: kubernetes-the-hard-way
+        fwname: kubernetes-the-hard-way-allow-internal
+        allowed: 'tcp;udp;icmp'
+        src_range: ['10.240.0.0/24', '10.200.0.0/16']
+        state: present
+
+    - name: Create firewall rule kubernetes-the-hard-way-aalow-external
+      gce_net:
+        name: kubernetes-the-hard-way
+        fwname: "kubernetes-the-hard-way-allow-external"
+        allowed: 'tcp:22,6443;icmp'
+        src_range: ['0.0.0.0/0']
+        state: present
+
+    - name: Create static IP adress
+      gce_eip:
+        name: kubernetes-the-hard-way
+        region: us-west1
+        state: present
+      register: gce_eip
+      tags: always
+
+    - name: Create kubernetes controller
+      gce:
+        instance_names: controller-0
+        machine_type: n1-standard-1
+        metadata: '{"sshKeys":"appuser:{{ lookup("file", "~/.ssh/appuser.pub") }}"}'
+        service_account_permissions:
+          - compute-rw
+          - storage-ro
+          - service-management
+          - service-control
+          - logging-write
+          - monitoring        
+        image: ubuntu-1604-xenial-v20190122a
+        disk_size: 200
+        ip_forward: true
+        network: kubernetes-the-hard-way
+        subnetwork: kubernetes
+        zone: us-west1-a
+        state: present
+
+    - name: Create kubernetes worker
+      gce:
+        instance_names: worker-0
+        machine_type: n1-standard-1
+        image: ubuntu-1604-xenial-v20190122a
+        disk_size: 200
+        ip_forward: true
+        metadata: '{"sshKeys":"appuser:{{ lookup("file", "~/.ssh/appuser.pub") }}","pod-cidr":"10.200.0.0/24"}'
+        service_account_permissions:
+          - compute-rw
+          - storage-ro
+          - service-management
+          - service-control
+          - logging-write
+          - monitoring
+        network: kubernetes-the-hard-way
+        subnetwork: kubernetes
+        zone: us-west1-a
+        state: present

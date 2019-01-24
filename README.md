@@ -258,3 +258,16 @@ stackdriver_monitoring_scrapes_total counter
 - Выполнить make, заполнив переменные. Или пуропстить пункт и взять мои образы.
 - Выполнить docker-compose -f docker-compose-logging.yml -f docker-compose.yml up -d
 - Проверить zipkin и kibana.
+
+# HW-21
+## В процессе сделано
+- Написали deployment для сервиса post.
+- Написали deployment для других сервисов.
+- Создал playbook для выполнение 2 и 3 шага инструкции the_hard_way (установка клиентских инструментов на локалхост и развёртывание сети, правил и самих ВМ). Посмотрел существующие ansible playbook. Сквозь многие таски проходит использование command/shell вместо модулей. Скорее всего, модулями какие-то вещи не сделать.
+- Установили k8s по инструкции https://github.com/kelseyhightower/kubernetes-the-hard-way.
+- Создали поды из созданных deployment.
+
+## Как проверить работоспособность.
+- Забрать ветку kubernetes-1.
+- Заполнить системные переменные apache-libcloud.
+- Выполнить `ansible-playbook 02-install-client-tools.yml` и `ansible-playbook 03-create-compute-resources.yml`.
