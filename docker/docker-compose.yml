@@ -55,7 +55,7 @@ services:
     volumes:
       - source_app:/reddit/app
     environment:
-      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}      
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     command: "puma --debug -w 2"
     networks:
       - front_net
