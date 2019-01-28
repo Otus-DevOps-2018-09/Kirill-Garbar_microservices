@@ -1,9 +1,11 @@
-resource "google_container_cluster" "primary" {
+resource "google_container_cluster" "standard-cluster-1" {
   name               = "${var.cluster_name}"
   zone               = "${var.zone}"
   initial_node_count = "${var.workers_count}"
+  # node_version = "${var.cluster_min_ver}"
   min_master_version = "${var.cluster_min_ver}"
   enable_legacy_abac = "false"
+  subnetwork = "default"
 
   master_auth {
     username = ""
