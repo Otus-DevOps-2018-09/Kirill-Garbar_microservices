@@ -287,3 +287,10 @@ stackdriver_monitoring_scrapes_total counter
 - Ссылка на дашборд http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy с помощью kubectl-proxy. Не понял, зачем он нужен в данном случае. У гугла есть свой встроенный с такой же (или похожей) функциональностью.
 - В kubernetes/terraform/stage написал инфру для создания кластера.
 - В манифесте dashboard-cluster-role-binding.yml описал биндинг роли cluster-admin на сервис акк kubernetes-dashboard. В TF включил dashboard.
+
+## Как проверить работоспособность.
+- Забрать ветку kubernetes-2.
+- Выполнить `terrfaorm apply` в kubernetes/terraform/stage.
+- Настроить kubectl на удалённый кластер.
+- Выполнить `kubectl apply -f .` в kubernetes/reddit.
+- Создать разрешающие правила для приложения (Не стал их добавлять в конфу кбер-кластера).
