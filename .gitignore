@@ -31,3 +31,4 @@ vault.key
 create_docker_host.sh
 .env
 .make_vars
+kubernetes/Gitlab_ci/

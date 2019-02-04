@@ -1,0 +1,16 @@
+---
+service:
+  internalPort: 9292
+  externalPort: 9292
+
+image:
+  repository: kirillgarbar
+  tag: logging
+
+postHost:
+postPort:
+commentHost:
+commentPort:
+
+ingress:
+  class: nginx
