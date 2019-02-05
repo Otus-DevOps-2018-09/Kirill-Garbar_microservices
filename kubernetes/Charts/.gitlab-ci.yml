@@ -29,6 +29,8 @@ staging:
     refs:
       - master
     kubernetes: active
+  except: 
+    - triggers    
 
 production:
   stage: production
@@ -42,11 +44,12 @@ production:
   environment:
     name: production
     url: http://production
-  when: manual
   only:
     refs:
       - master
     kubernetes: active
+  except:
+    - pushes
 
 .auto_devops: &auto_devops |
   # Auto DevOps variables and functions

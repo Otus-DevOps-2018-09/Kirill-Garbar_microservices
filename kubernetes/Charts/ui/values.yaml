@@ -5,7 +5,7 @@ service:
 
 image:
   repository: kirillgarbar
-  tag: logging
+  tag: master
 
 postHost:
 postPort:

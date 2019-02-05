@@ -1,20 +1,20 @@
 comment:
   image:
     repository: kirillgarbar
-    tag: latest
+    tag: master
   service:
     externalPort: 9292
 
 post:
   image:
     repository: kirillgarbar
-    tag: latest
+    tag: master
     service:
       externalPort: 5000
 
 ui:
   image:
     repository: kirillgarbar
-    tag: latest
+    tag: master
     service:
       externalPort: 9292
