@@ -1,0 +1,27 @@
+elasticsearch:
+  service:
+    dbInternalPort: 9200
+    transportInternalPort: 9300
+
+  image:
+    name: k8s.gcr.io/elasticsearch
+    tag: v5.6.4
+
+fluentd:
+  service:
+    dbInternalPort: 9200
+
+  image:
+    name: gcr.io/google-containers/fluentd-elasticsearch
+    tag: v2.0.2
+
+kibana:
+  image:
+    repository: "kibana"
+    tag: "5.4.3"
+  ingress:
+    enabled: true
+    hosts: {efk-test-reddit-kibana}
+  env:
+    SERVER_PORT: 5601
+    ELASTICSEARCH_URL: http://efk-test-elasticsearch:9200

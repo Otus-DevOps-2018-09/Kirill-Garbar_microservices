@@ -10,7 +10,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ .Values.service.externalPort }}
+  - name: post
+    port: {{ .Values.service.externalPort }}
     protocol: TCP
     targetPort: {{ .Values.service.internalPort }}
   selector:

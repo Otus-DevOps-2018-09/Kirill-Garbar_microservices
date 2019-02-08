@@ -1,0 +1,6 @@
+name: efk
+version: 0.1.1
+description: OTUS efk application
+maintainers:
+  - name: Kirill Garbar
+    email: kirill@garbar.pro

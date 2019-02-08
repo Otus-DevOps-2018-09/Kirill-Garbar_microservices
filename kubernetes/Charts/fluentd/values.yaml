@@ -1,0 +1,7 @@
+---
+service:
+  dbInternalPort: 9200
+
+image:
+  name: gcr.io/google-containers/fluentd-elasticsearch
+  tag: v2.0.2

@@ -1,0 +1,8 @@
+---
+service:
+  dbInternalPort: 9200
+  transportInternalPort: 9300
+
+image:
+  name: k8s.gcr.io/elasticsearch
+  tag: v5.6.4

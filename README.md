@@ -336,3 +336,44 @@ stackdriver_monitoring_scrapes_total counter
 - В основном пайплайне staging сделал недоступным для запусков пайплайна по триггеру (по условию задачи). Не стал его удалять т.к. этот stage будет необходим для тестирования пайплайна при изменении самих чартов.
 - В основном пайплайне production сделал недоступным для запусков пайплайны по событию push, чтобы не сделать релиз при изменении чарта. Хотя по условию задачи ветка master микросервисов всегда равна продакшну.
 - В пайплайнах микросервисов добавил step trigger_deploy, в котором вызывается функция trigger_deploy(), в которой устанавливается curl и дёргается триггер запуска основного пайплайна.
+
+
+# HW-25
+## В процессе сделано.
+- Добавил создание более мощного пула из предыдущего ДЗ -в terraform.
+- Установили ингресс контроллер nginx. Добавили в хосты имена из этого ДЗ на выданный IP nginx.
+- Загрузили чарт прометея, распаковали, отредактировали конфиг (переменные).
+- Включили kube-state-metrics и node-exporter.
+- Настроили service discovery по меткам.
+- Настроили relabeling, чтобы метки кубера транслировались в метки прометея.
+- Установили grafana. Импортировали дашборд из паблика, импортировали старые дашборды из ДЗ monitoring-2. Включили механизм темплейтинга через создание переменной.
+- Параметризовали дашборды, созданные в ДЗ monitoring-2.
+- Запустил alertmanager, настроил алерты в слак по падению api кубера (проверить не смог) и по падению ноды (проверил отключением ноды).
+- Установил prometheus-operator. Директория kubbernetes/prometheus-operator. Настроил ingress для него. Настроил мониторинг всех post-сервисов из всех неймспейсов.
+- Поставили label на наши мощные ноды, чтобы туда ставить elasticsearch.
+- Загрузили yaml-файлы из предоставленных gist.
+- Создал Helm-chart с установкой EFK. Идеально создать не вышло, т.к. в чарт Кибаны передаётся ссылка на Эластик, а ссылки я сделал типа релизов reddit, чтобы можно было поставить несколько EFK. Редактировать готовый чарт Кибаны посчитал лишним. Поэтому имя релиза захардкожено в переменных чарта.
+
+## Как проверить работоспособность.
+- Забрать ветку Kubernetes-5.
+- Выполнить `terraform apply` в kubernetes/terraform/stage.
+- Настроить kubectl на удалённый кластер.
+- Набор команд, создающих Tiller, релизы приложений. Нужно перейти в kubernetes/Charts/reddit
+```
+kubectl apply -f ../../reddit/tiller.yml
+helm init --service-account tiller
+helm dep update
+helm upgrade reddit-test . --install
+helm upgrade production --namespace production . --install
+helm upgrade staging --namespace staging . --install
+helm install stable/nginx-ingress --name nginx
+cd ..
+cd prometheus && helm upgrade prom . -f custom_values.yaml --install
+kubectl apply -f ../prometheus-operator/
+kubectl apply -f ../prometheus-operator/
+```
+- Последнюю команду выполнять два раза, т.к. одна создаст api, другая создаст прометей и сервис монитор из этого api.
+- Посмотреть IP, присвоенный nginx `kubectl get ingress`. Добавить в хосты:
+```
+IP_NGINX  prometheus-operator-prometheus prometheus reddit reddit-prometheus reddit-grafana production reddit-kibana efk-test-reddit-kibana reddit-test
+```
