@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: post
+  labels:
+    team: frontend
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: reddit
+      component: post
+  endpoints:
+  - port: post

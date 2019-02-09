@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "es.fullname" . }}
+  labels:
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+    app: efk
+    component: es
+    release: {{ .Release.Name }}
+spec:
+  serviceName: {{ template "es.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: efk
+      component: es
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: efk
+        component: es
+        release: {{ .Release.Name }}
+        kubernetes.io/cluster-service: "true"
+    spec:
+      nodeSelector:
+        elastichost: "true"
+      containers:
+      - image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        name: {{ template "es.fullname" . }}
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        ports:
+        - containerPort: {{ .Values.service.dbInternalPort }}
+          name: db
+          protocol: TCP
+        - containerPort: {{ .Values.service.transportInternalPort }}
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - name: {{ printf "%s-pvc-volume" (include "es.fullname" .) }}
+          mountPath: /data
+        env:
+        - name: ELASTICSEARCH_SERVICE_NAME
+          value: {{ template "es.fullname" . }}
+        - name: MINIMUM_MASTER_NODES
+          value: "1"
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      volumes:
+      - name: {{ printf "%s-pvc-volume" (include "es.fullname" .) }}
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-claim" (include "es.fullname" .) }}
+      # Elasticsearch requires vm.max_map_count to be at least 262144.
+      # If your OS already sets up this number to a higher value, feel free
+      # to remove this init container.
+      initContainers:
+      - image: alpine:3.6
+        command: ["/sbin/sysctl", "-w", "vm.max_map_count=262144"]
+        name: {{ printf "%s-init" (include "es.fullname" .) }}
+        securityContext:
+          privileged: true
